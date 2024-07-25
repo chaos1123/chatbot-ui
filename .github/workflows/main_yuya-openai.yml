@@ -21,15 +21,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: npm install, build, and test
+      - name: npm install and audit fix
         run: |
           npm install
           npm install @playwright/test --save-dev
-          npm run build --if-present
-          npm run test --if-present
+          npm audit fix
+
+      - name: Build project
+        run: npm run build --if-present
+
+      - name: Test with Jest
+        run: npm run test:jest --if-present
+
+      - name: Test with Playwright
+        run: npm run test:playwright --if-present
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip release.zip -r ./* -x "*.git*" "node_modules/*" "__tests__/*" "playwright-tests/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -69,4 +77,3 @@ jobs:
           app-name: 'yuya-openai'
           slot-name: 'Production'
           package: .
-          
